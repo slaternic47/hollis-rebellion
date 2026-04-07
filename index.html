@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Hollis Rebellion</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0a0f;
+    --gold: #c9a84c;
+    --gold-dim: rgba(201, 168, 76, 0.35);
+    --gold-glow: rgba(201, 168, 76, 0.12);
+    --text: #e8e4f0;
+    --text-dim: #9a93a8;
+    --accent: #a07bcc;
+    --accent-dim: rgba(160, 123, 204, 0.3);
+    --surface: #161222;
+    --surface-border: rgba(201, 168, 76, 0.25);
+    --main-color: #c9a84c;
+    --shadow-color: #cc4444;
+    --broker-color: #4a9e8e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    text-align: center;
+    padding: 50px 20px 15px;
+  }
+
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  header p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ===== FAMILY RULES ===== */
+  .family-rules {
+    max-width: 700px;
+    margin: 30px auto 10px;
+    padding: 30px 40px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 4px;
+    background: rgba(22, 18, 34, 0.6);
+    position: relative;
+  }
+
+  .family-rules::before {
+    content: '⬥';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 12px;
+    color: var(--gold);
+    font-size: 0.9rem;
+  }
+
+  .family-rules h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .family-rules ol {
+    list-style: none;
+    counter-reset: rules;
+    padding: 0;
+  }
+
+  .family-rules ol li {
+    counter-increment: rules;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 4px;
+  }
+
+  .family-rules ol li::before {
+    content: counter(rules) ".";
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+
+  /* ===== BRANCH LEGEND ===== */
+  .branch-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 25px auto 10px;
+    flex-wrap: wrap;
+  }
+
+  .branch-legend .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+  }
+
+  .branch-legend .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .branch-legend .legend-dot.main { background: var(--main-color); }
+  .branch-legend .legend-dot.shadow { background: var(--shadow-color); }
+  .branch-legend .legend-dot.broker { background: var(--broker-color); }
+
+  /* ===== TREE SVG ===== */
+  .tree-svg {
+    width: 100%;
+    max-width: 1800px;
+    height: auto;
+    margin: 10px auto 20px;
+  }
+
+  .node-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .node-card .circle {
+    border-radius: 50%;
+    border: 2px solid rgba(201,168,76,0.25);
+    background: #161222;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+  }
+
+  .node-card:hover .circle {
+    border-color: #c9a84c;
+    box-shadow: 0 0 30px rgba(201,168,76,0.15);
+    transform: scale(1.2);
+  }
+
+  .node-card.center-node .circle {
+    border: 3px solid #c9a84c;
+    background: radial-gradient(circle at 30% 30%, #1e1830, #161222);
+    box-shadow: 0 0 50px rgba(201,168,76,0.12), 0 0 100px rgba(201,168,76,0.06);
+  }
+
+  .node-card .circle .title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 700;
+    color: #e8e4f0;
+    line-height: 1.1;
+  }
+
+  .node-card .circle .alpha {
+    color: #c9a84c;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .node-card .branch-label {
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.4);
+  }
+
+  .node-card .branch-label.main { color: #c9a84c; border: 1px solid rgba(201,168,76,0.3); }
+  .node-card .branch-label.shadow { color: #cc4444; border: 1px solid rgba(204,68,68,0.3); }
+  .node-card .branch-label.broker { color: #4a9e8e; border: 1px solid rgba(74,158,142,0.3); }
+
+  .node-card .pairing {
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #c9a84c;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  .node-card .tropes {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .node-card .trope {
+    padding: 3px 9px;
+    border: 1px solid rgba(160,123,204,0.35);
+    border-radius: 12px;
+    color: #a07bcc;
+    white-space: nowrap;
+  }
+
+  .node-card .tbd {
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    color: #9a93a8;
+    text-transform: uppercase;
+    font-style: italic;
+    opacity: 0.7;
+  }
+
+  .node-card .cover-circle {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    border: 3px solid #c9a84c;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(201,168,76,0.12), 0 0 100px rgba(201,168,76,0.06);
+    margin: 0 auto;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .node-card:hover .cover-circle {
+    transform: scale(1.2);
+    box-shadow: 0 0 50px rgba(201,168,76,0.25), 0 0 100px rgba(201,168,76,0.12);
+  }
+
+  .node-card .read-now {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #0c0a0f;
+    background: #c9a84c;
+    padding: 6px 18px;
+    border-radius: 3px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .node-card:hover .read-now {
+    background: #dbb85c;
+    box-shadow: 0 0 20px rgba(201,168,76,0.3);
+  }
+
+  .node-card .cover-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  footer {
+    text-align: center;
+    padding: 10px 20px 50px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.4;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Hollis Rebellion</h1>
+  <p>The Family Tree</p>
+</header>
+
+<!-- FAMILY RULES -->
+<div class="family-rules">
+  <h2>Family Rules for Alphas</h2>
+  <ol>
+    <li>You serve the family first. Personal desires come second.</li>
+    <li>You mate who you are told to mate. Love is irrelevant.</li>
+    <li>You maintain the image. A Hollis Alpha is strong, dominant, controlled, and above scandal.</li>
+    <li>You do not show weakness. Submission, vulnerability, or emotional dependency are unacceptable.</li>
+    <li>You do not expose family business. Loyalty is absolute.</li>
+    <li>You do not leave. There is no walking away from the Hollis name.</li>
+  </ol>
+</div>
+
+<!-- BRANCH LEGEND -->
+<div class="branch-legend">
+  <div class="legend-item"><span class="legend-dot main"></span> Main Branch</div>
+  <div class="legend-item"><span class="legend-dot shadow"></span> Shadow Branch</div>
+  <div class="legend-item"><span class="legend-dot broker"></span> Broker Branch</div>
+</div>
+
+<!-- TREE -->
+<svg class="tree-svg" viewBox="0 0 1800 1620" xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="1800" height="1620" fill="#0c0a0f" />
+
+  <!--
+    COORDINATES:
+    Muse:    900, 680
+    Sinner:  250, 250
+    Crown:   900, 150
+    Venom:   1550, 250
+    Ghost:   130, 680
+    Riot:    1670, 680
+    Burnout: 350, 1130
+    Hush:    900, 1330
+    Bone:    1450, 1130
+  -->
+
+  <!-- ===== CONNECTING LINES ===== -->
+  <line x1="900" y1="680" x2="250" y2="250" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="900" y2="150" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="1550" y2="250" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="130" y2="680" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="1670" y2="680" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="350" y2="1130" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="900" y2="1330" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+  <line x1="900" y1="680" x2="1450" y2="1130" stroke="rgba(201,168,76,0.3)" stroke-width="2" />
+
+  <!-- Sibling lines -->
+  <line x1="350" y1="1130" x2="900" y2="1330" stroke="rgba(160,123,204,0.3)" stroke-width="1.5" stroke-dasharray="6 4" />
+  <line x1="900" y1="1330" x2="1450" y2="1130" stroke="rgba(160,123,204,0.3)" stroke-width="1.5" stroke-dasharray="6 4" />
+  <line x1="350" y1="1130" x2="1450" y2="1130" stroke="rgba(160,123,204,0.3)" stroke-width="1.5" stroke-dasharray="6 4" />
+
+  <!-- ===== LINE LABELS ===== -->
+
+  <rect x="500" y="430" width="130" height="24" rx="4" fill="#0c0a0f" />
+  <text x="565" y="447" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Sai's Uncle</text>
+
+  <rect x="830" y="400" width="140" height="24" rx="4" fill="#0c0a0f" />
+  <text x="900" y="417" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Eldest Cousin</text>
+
+  <rect x="1140" y="430" width="150" height="24" rx="4" fill="#0c0a0f" />
+  <text x="1215" y="447" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Sai's Nephew</text>
+
+  <rect x="430" y="662" width="130" height="24" rx="4" fill="#0c0a0f" />
+  <text x="495" y="679" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Half-Sibling</text>
+
+  <rect x="1230" y="662" width="100" height="24" rx="4" fill="#0c0a0f" />
+  <text x="1280" y="679" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Cousin</text>
+
+  <rect x="555" y="890" width="100" height="24" rx="4" fill="#0c0a0f" />
+  <text x="605" y="907" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Cousin</text>
+
+  <rect x="840" y="955" width="100" height="24" rx="4" fill="#0c0a0f" />
+  <text x="890" y="972" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Cousin</text>
+
+  <rect x="1120" y="890" width="100" height="24" rx="4" fill="#0c0a0f" />
+  <text x="1170" y="907" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="15" fill="#c9a84c">Cousin</text>
+
+  <!-- Sibling labels -->
+  <rect x="555" y="1225" width="100" height="20" rx="4" fill="#0c0a0f" />
+  <text x="605" y="1239" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="13" fill="#a07bcc">Brothers</text>
+
+  <rect x="1105" y="1225" width="100" height="20" rx="4" fill="#0c0a0f" />
+  <text x="1155" y="1239" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="13" fill="#a07bcc">Brothers</text>
+
+  <rect x="850" y="1118" width="100" height="20" rx="4" fill="#0c0a0f" />
+  <text x="900" y="1132" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="13" fill="#a07bcc">Brothers</text>
+
+  <!-- ===== NODES ===== -->
+
+  <!-- CENTER: MUSE — Main Branch -->
+  <foreignObject x="720" y="520" width="360" height="400">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://books2read.com/u/38NaAr" target="_blank" rel="noopener" class="node-card center-node">
+      <div class="cover-circle">
+        <img src="https://cdn.shopify.com/s/files/1/0858/5763/2547/files/Hollis_Rebellion_1.png?v=1775413357" alt="Muse Book Cover" />
+      </div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <div class="title" style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:#e8e4f0;">Muse</div>
+        <div class="alpha" style="font-size:0.8rem;color:#c9a84c;letter-spacing:0.12em;text-transform:uppercase;">Alpha: Sai</div>
+        <span class="branch-label main">Main Branch</span>
+        <span class="pairing" style="font-size:0.85rem;">MM · Mpreg</span>
+        <div class="tropes" style="max-width:300px;">
+          <span class="trope" style="font-size:0.8rem;">Stalker Photographer</span>
+          <span class="trope" style="font-size:0.8rem;">Camboy</span>
+        </div>
+        <span class="read-now">Read Now</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- SINNER — Shadow Branch -->
+  <foreignObject x="80" y="125" width="340" height="300">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Sinner</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Cain</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label shadow">Shadow Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MM · Alpha × Alpha</span>
+        <div class="tropes" style="max-width:300px;">
+          <span class="trope" style="font-size:0.75rem;">Tattoo Artist</span>
+          <span class="trope" style="font-size:0.75rem;">Priest's Alpha Son</span>
+          <span class="trope" style="font-size:0.75rem;">Corruption</span>
+          <span class="trope" style="font-size:0.75rem;">Forbidden</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- CROWN — Main Branch -->
+  <foreignObject x="730" y="25" width="340" height="290">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Crown</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Alistair</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label main">Main Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MM · Alpha × Alpha</span>
+        <div class="tropes" style="max-width:300px;">
+          <span class="trope" style="font-size:0.75rem;">CEO</span>
+          <span class="trope" style="font-size:0.75rem;">Personal Assistant</span>
+          <span class="trope" style="font-size:0.75rem;">Secret Identity</span>
+          <span class="trope" style="font-size:0.75rem;">Possessive</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- VENOM — Shadow Branch -->
+  <foreignObject x="1380" y="125" width="340" height="300">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Venom</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Rael</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label shadow">Shadow Branch</span>
+        <span class="pairing" style="font-size:0.75rem;">MMF · Alpha × Beta Couple</span>
+        <div class="tropes" style="max-width:300px;">
+          <span class="trope" style="font-size:0.75rem;">Retired Fighter</span>
+          <span class="trope" style="font-size:0.75rem;">Paramedic</span>
+          <span class="trope" style="font-size:0.75rem;">Married Betas</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- GHOST — Shadow Branch -->
+  <foreignObject x="0" y="555" width="300" height="300">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Ghost</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Niran</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label shadow">Shadow Branch</span>
+        <span class="pairing" style="font-size:0.75rem;">MFM · Alpha Clash</span>
+        <div class="tropes" style="max-width:280px;">
+          <span class="trope" style="font-size:0.75rem;">Ex-Military</span>
+          <span class="trope" style="font-size:0.75rem;">Female Omega</span>
+          <span class="trope" style="font-size:0.75rem;">Existing Lover</span>
+          <span class="trope" style="font-size:0.75rem;">Outcast</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- RIOT — Main Branch -->
+  <foreignObject x="1500" y="555" width="300" height="300">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Riot</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Zev</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label main">Main Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MFM</span>
+        <div class="tropes" style="max-width:280px;">
+          <span class="trope" style="font-size:0.75rem;">Music Producer</span>
+          <span class="trope" style="font-size:0.75rem;">Band Dynamic</span>
+          <span class="trope" style="font-size:0.75rem;">Rivals to Lovers</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- BURNOUT — Shadow Branch -->
+  <foreignObject x="180" y="1005" width="340" height="340">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="cover-circle" style="width:140px;height:140px;">
+        <img src="https://cdn.shopify.com/s/files/1/0858/5763/2547/files/Hollis_Rebellion_5.png?v=1775413464" alt="Burnout Book Cover" />
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <div class="title" style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:#e8e4f0;">Burnout</div>
+        <div class="alpha" style="font-size:0.75rem;color:#c9a84c;letter-spacing:0.12em;text-transform:uppercase;">Alpha: Koda</div>
+        <span class="branch-label shadow">Shadow Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MMM · Mpreg</span>
+        <div class="tropes" style="max-width:300px;">
+          <span class="trope" style="font-size:0.75rem;">Race Car Driver</span>
+          <span class="trope" style="font-size:0.75rem;">Drug Dealer</span>
+          <span class="trope" style="font-size:0.75rem;">Two Omega Mechanics</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- HUSH — Broker Branch -->
+  <foreignObject x="730" y="1205" width="340" height="320">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="cover-circle" style="width:140px;height:140px;">
+        <img src="https://cdn.shopify.com/s/files/1/0858/5763/2547/files/Hollis_Rebellion_7.png?v=1775413509" alt="Hush Book Cover" />
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <div class="title" style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:#e8e4f0;">Hush</div>
+        <div class="alpha" style="font-size:0.75rem;color:#c9a84c;letter-spacing:0.12em;text-transform:uppercase;">Alpha: Lyric</div>
+        <span class="branch-label broker">Broker Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MM</span>
+        <div class="tropes" style="max-width:280px;">
+          <span class="trope" style="font-size:0.75rem;">Older Omega</span>
+          <span class="trope" style="font-size:0.75rem;">Lawyer</span>
+          <span class="trope" style="font-size:0.75rem;">Artist</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+  <!-- BONE — Shadow Branch -->
+  <foreignObject x="1280" y="1005" width="340" height="300">
+    <a xmlns="http://www.w3.org/1999/xhtml" href="https://YOUR-BOOK-LINK.com" target="_blank" rel="noopener" class="node-card">
+      <div class="circle" style="width:140px;height:140px;">
+        <div class="title" style="font-size:1.7rem;">Bone</div>
+        <div class="alpha" style="font-size:0.75rem;margin-top:4px;">Alpha: Orion</div>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;">
+        <span class="branch-label shadow">Shadow Branch</span>
+        <span class="pairing" style="font-size:0.8rem;">MM</span>
+        <div class="tropes" style="max-width:280px;">
+          <span class="trope" style="font-size:0.75rem;">Underworld Surgeon</span>
+          <span class="trope" style="font-size:0.75rem;">Kidnapped Omega</span>
+          <span class="trope" style="font-size:0.75rem;">Captive</span>
+          <span class="trope" style="font-size:0.75rem;">Dubcon</span>
+        </div>
+        <span class="tbd">Release TBD</span>
+      </div>
+    </a>
+  </foreignObject>
+
+</svg>
+
+<footer>The Hollis Rebellion</footer>
+
+</body>
+</html>
